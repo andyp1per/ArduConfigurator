@@ -113,7 +113,7 @@ var preflight_reboot = function (target_system,target_component) {
     var packet = new mavlink20.messages.command_long(target_system,target_component,
         mavlink20.MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN,
         0, // confirmation
-        1,0,1,0,0,0,0 // params 1-7
+        3,0,1,0,0,0,0 // params 1-7
         );
 
     mavParserObj.send(packet); 
@@ -767,7 +767,7 @@ var MSP = {
         this.callbacks = [];
     },
     disconnect_cleanup: function () {
-        //this.state = 0; // reset packet state for "clean" initial entry (this is only required if user hot-disconnects)
+        this.state = 0; // reset packet state for "clean" initial entry (this is only required if user hot-disconnects)
         this.packet_error = 0; // reset CRC packet error counter for next session
 
         this.callbacks_cleanup();

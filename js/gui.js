@@ -4,9 +4,9 @@
 var TABS = {}; // filled by individual tab js file
 
 var GUI_control = function () {
-    this.connecting_to = false;
-    this.connected_to = false;
-    this.connect_lock = false;
+    this.connecting_to = false; // port name of the to-be-connected device, e.g. /dev/cu.usbmodem14301
+    this.connected_to = false;  // port name of the connected device, e.g. /dev/cu.usbmodem14301
+    this.connect_lock = false;  // disable connect callback in the GUI
     this.active_tab;
     this.tab_switch_in_progress = false;
     this.operating_system;

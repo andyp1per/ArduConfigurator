@@ -50,15 +50,16 @@ PortHandler.initialize = function () {
     this.check();
 };
 
-PortHandler.check = function () {
+PortHandler.check = function (callback) {
     var self = this;
 
     connection.getDevices(function(current_ports) {
-        // port got removed or initial_ports wasn't initialized yet
-        if (self.array_difference(self.initial_ports, current_ports).length > 0 || !self.initial_ports) {
-            var removed_ports = self.array_difference(self.initial_ports, current_ports);
 
-            if (self.initial_ports != false) {
+        var removed_ports = self.array_difference(self.initial_ports, current_ports);
+        // port got removed or initial_ports wasn't initialized yet
+        if (removed_ports.length > 0 || !self.initial_ports) {
+
+            if (self.initial_ports) {
                 if (removed_ports.length > 1) {
                     console.log('PortHandler - Removed: ' + removed_ports);
                 } else {
@@ -71,7 +72,8 @@ PortHandler.check = function () {
             if (GUI.connected_to) {
                 for (var i = 0; i < removed_ports.length; i++) {
                     if (removed_ports[i] == GUI.connected_to) {
-                        $('div#port-picker a.connect').click();
+                        // this should set GUI.connected_to to false
+                        $('div#port-picker a.connect').trigger('click');
                     }
                 }
             }
@@ -95,8 +97,8 @@ PortHandler.check = function () {
                 }
             }
 
-            // auto-select last used port (only during initialization)
-            if (!self.initial_ports) {
+            // auto-select last used port and other parameters (only during initialization)
+            else {
                 chrome.storage.local.get('last_used_port', function (result) {
                     // if last_used_port was set, we try to select it
                     if (result.last_used_port) {
@@ -137,6 +139,9 @@ PortHandler.check = function () {
                         $('div#port-picker #port').val('manual');
                         $('#port-override').val('udp://localhost:14550');
                         $('#port-override-option').show();
+                chrome.storage.local.get('auto_connect_enabled', function (result) {
+                    if (result['auto_connect_enabled']) {
+                        $('#auto-connect').prop('checked', true).change();
                     }
                 });
 
@@ -160,7 +165,7 @@ PortHandler.check = function () {
                 console.log('PortHandler - Found: ' + new_ports);
             } else {
                 console.log('PortHandler - Found: ' + new_ports[0]);
-                connection.newport = new_ports[0]; // remmber name of new port
+                connection.newport = new_ports[0]; // remember name of new port
             }
 
             self.update_port_select(current_ports);
@@ -173,7 +178,8 @@ PortHandler.check = function () {
             if (!GUI.connected_to) {
                 $('div#port-picker #port').val(new_ports[0]);
                 if ( helper['autoconnect'] == true ) {
-                    $('div#port-picker #port').val(GUI.connected_to);
+                    GUI.connected_to = new_ports[0];
+                    $('div.connect_controls a.connect').trigger("click");
                 }
             } else {
                 $('div#port-picker #port').val(GUI.connected_to);
@@ -197,9 +203,10 @@ PortHandler.check = function () {
             self.initial_ports = current_ports;
         }
 
-        self.check_usb_devices();
+        self.check_usb_devices(callback);
 
         GUI.updateManualPortVisibility();
+
         setTimeout(function () {
             self.check();
         }, 50); // buzz was 250
@@ -288,7 +295,14 @@ PortHandler.port_removed = function (name, code, timeout, ignore_timeout) {
     return obj;
 };
 
-// accepting single level array with "value" as key
+/**
+ * Return the elements of {@param firstArray} that are not in {@param secondArray}.
+ * Assumes a  single level array with "value" as key
+ *
+ * @param {*} firstArray
+ * @param {*} secondArray
+ * @returns an array
+ */
 PortHandler.array_difference = function (firstArray, secondArray) {
     var cloneArray = [];
 

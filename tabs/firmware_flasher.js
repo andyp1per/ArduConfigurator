@@ -440,8 +440,12 @@ TABS.firmware_flasher.initialize = function (callback) {
 
                 $('span.progressLabel').html('<a class="save_firmware" href="#" title="Save Firmware">Loaded Online Firmware: (' + parsed_hex.bytes_total + ' bytes)</a>');
 
-                $('a.flash_firmware').removeClass('disabled'); //for now we DONT want .apj to use this button
-                $('a.flash_firmware').hide(); // we need for .js to be able to trigger it, but don't want human to click it.
+                if (CONFIGURATOR.connectionValid) {
+                    $('a.flash_firmware').removeClass('disabled'); //for now we DONT want .apj to use this button
+                    $('a.flash_firmware').text(chrome.i18n.getMessage('firmwareFlasherFlashFirmwareAPJ'));
+                } else {
+                    $('a.flash_firmware').hide(); // we need for .js to be able to trigger it, but don't want human to click it.
+                }
 
                 $('div.release_info .target').text(summary.target);
                 $('div.release_info .status').html(chrome.i18n.getMessage('firmwareFlasherReleaseStatusReleaseCandidate')).show();
@@ -571,8 +575,7 @@ TABS.firmware_flasher.initialize = function (callback) {
         });
 
 
-
-        $('a.flash_firmware').click(function () {
+        $('a.flash_firmware').on('click', function () {
             if (!$(this).hasClass('disabled')) {
                 if (!GUI.connect_lock) { // button disabled while flashing is in progress
                     if (parsed_hex != false) {

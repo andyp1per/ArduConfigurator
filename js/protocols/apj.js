@@ -188,6 +188,8 @@ APJ_protocol.prototype.connect = function (port, baud, hex, options, callback) {
                 // connection.send(bufferOut, function () {} )
                 // connection.send(bufferOut, function () {} )
 
+                //PortHandler.disable = true;
+
                 connection.send(bufferOut, function () {
                     connection.disconnect(function (result) {
                         if (result) {
@@ -204,6 +206,9 @@ APJ_protocol.prototype.connect = function (port, baud, hex, options, callback) {
                                 }
                                 // Check for DFU devices
                                 console.log("apj connection.disconnect interval")
+
+                                //PortHandler.disable = false;
+
                                 PortHandler.check_usb_devices(function(dfu_available) {
 
                                     console.log("apj check_usb_devices")
@@ -218,7 +223,7 @@ APJ_protocol.prototype.connect = function (port, baud, hex, options, callback) {
                                             // Serial port might briefly reappear on DFU devices while
                                             // the FC is rebooting, so we don't clear the interval
                                             // until we successfully connect.
-                                            connection.connect(port, {bitrate: self.baud, parityBit: 'even', stopBits: 'one'}, function (openInfo) {
+                                            connection.connect(port, {bitrate: 115200, parityBit: 'even', stopBits: 'one'}, function (openInfo) {
                                                 console.log("apj check_usb_devices -> connection.connect")
                                                 if (openInfo) {
                                                     clearInterval(interval);
@@ -378,7 +383,8 @@ APJ_protocol.prototype.send = function (Array, bytes_to_read, callback) {
     // empty receive buffer before next command is out
     this.receive_buffer = [];
 
-    //console.log("SEND-->",Array); 
+    //console.log("SEND-->", Array.forEach(element => Number(element).toString(16)));
+    console.log("SEND-->", Array);
 
     // send over the actual data
     connection.send(bufferOut, this.write_callback ); // we don't really care if/when its written
@@ -459,6 +465,7 @@ APJ_protocol.prototype.upload_procedure = function (step) {
 
                     // if we still see mavlink stream, force a reboot..
                      if (reply[0] == 254 &&  (( reply[1] == 9)||( reply[1] == 28) ) ) { // starting bytes for a mavlink heartbeat....
+                        console.log('force reboot');
                         connection.emptyOutputBuffer();
                         connection.bytesReceived = 0; 
                         preflight_reboot();
@@ -467,6 +474,7 @@ APJ_protocol.prototype.upload_procedure = function (step) {
                      }
                     // if we still see mavlink stream, force a reboot..
                     if (reply[0] == 253 &&  (( reply[1] == 9)||( reply[1] == 25)||( reply[1] == 28)||( reply[1] == 12)||( reply[1] == 29) )  ) { // starting bytes for a mavlink heartbeat....
+                        console.log('force reboot');
                         preflight_reboot();
                         //self.upload_procedure(1);
                         self.connect(self.port,self.baud,self.hex,self.options,self.callback); // recursive retry

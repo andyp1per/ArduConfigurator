@@ -169,7 +169,7 @@ $(document).ready(function () {
         GUI.updateManualPortVisibility();
     });
 
-    $('div.connect_controls a.connect').click(function () {
+    $('div.connect_controls a.connect').on('click', function () {
         if (GUI.connect_lock != true) { // GUI control overrides the user control
 
             var clicks = $(this).data('clicks')??0;
@@ -198,6 +198,7 @@ $(document).ready(function () {
                     connection.connect(selected_port, {bitrate: selected_baud}, onOpen);
 
                 } else {
+                    console.log('Disconnecting and cleaning up: ' + selected_port)
                     var wasConnected = CONFIGURATOR.connectionValid;
 
                     helper.timeout.killAll();

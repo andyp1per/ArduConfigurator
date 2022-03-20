@@ -33,7 +33,7 @@ var connection = {
 
         if (testUrlTCP) {
             self.connectTcporUdp(testUrlTCP[1], testUrlTCP[2], options, callback,'tcp');
-        }else if (testUrlUDP) {
+        } else if (testUrlUDP) {
             self.connectTcporUdp(testUrlUDP[1], testUrlUDP[2], options, callback,'udp');
         } else {
             self.connectSerial(path, options, callback);
@@ -277,7 +277,7 @@ var connection = {
             if (self.connectionType == 'serial') {
                 disconnectFn = chrome.serial.disconnect ;
             }
-            if (self.connectionType == 'tcp') {
+            else if (self.connectionType == 'tcp') {
 
                  // send info to the backend to disconnect from tcp?  todo?
                 var msg = JSON.stringify({ 'disconnectNode': true, 'ip': self.connectionIP , 'port': self.connectionPort , 'type':self.connectionType }); //self.connectionType= 'tcp'
@@ -293,7 +293,7 @@ var connection = {
                 return;
                 //disconnectFn = chrome.sockets.tcp.close;
             }
-            if (self.connectionType == 'udp') {
+            else if (self.connectionType == 'udp') {
 
                 // send info to the backend to disconnect from tcp?  todo?
                 var msg = JSON.stringify({ 'disconnectNode': true, 'ip': self.connectionIP , 'port': self.connectionPort , 'type':self.connectionType }); //self.connectionType= 'udp'
@@ -359,7 +359,7 @@ var connection = {
         if (connection.connectionType == 'serial')  chromeType = chrome.serial;
         //if (connection.connectionType == 'tcp')  chromeType = chrome.sockets.tcp;
         //if (connection.connectionType == 'udp')  chromeType = chrome.sockets.udp;
-        if (!chromeType) return;
+        if (!chromeType || !this.connectionId) return;
 
         // getInfo:  https://developer.chrome.com/docs/extensions/reference/sockets_tcp/#method-getInfo
         chromeType.getInfo(this.connectionId, callback);
