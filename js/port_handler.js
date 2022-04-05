@@ -139,7 +139,9 @@ PortHandler.check = function (callback) {
                         $('div#port-picker #port').val('manual');
                         $('#port-override').val('udp://localhost:14550');
                         $('#port-override-option').show();
-                chrome.storage.local.get('auto_connect_enabled', function (result) {
+                    }
+                });
+                    chrome.storage.local.get('auto_connect_enabled', function (result) {
                     if (result['auto_connect_enabled']) {
                         $('#auto-connect').prop('checked', true).change();
                     }
